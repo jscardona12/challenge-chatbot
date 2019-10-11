@@ -3,7 +3,7 @@ import * as axios from 'axios';
 export const registerUser = (user)=>{
     return new Promise(async (resolve, reject) => {
         try {
-            const response = await axios.post('http://localhost:3030/register', user);
+            const response = await axios.post('http://localhost:3030/users/register', user);
             resolve(response.data);
         } catch (error) {
             reject(error);
@@ -21,3 +21,25 @@ export const saveUserIdInLS = (key,value)=>{
             }
         });
 };
+
+export const checkUsernameAvailability = (username) =>{
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios.post('http://localhost:3030/users/usernameAvailable', {username});
+            resolve(response.data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export const login = (user) =>{
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios.post('http://localhost:3030/users/login', user);
+            resolve(response.data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
