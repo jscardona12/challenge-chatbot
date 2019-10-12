@@ -43,3 +43,13 @@ export const login = (user) =>{
         }
     });
 }
+
+export const getUserId = ()=> {
+    return new Promise((resolve, reject) => {
+        try {
+            resolve(localStorage.getItem('userid'));
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
