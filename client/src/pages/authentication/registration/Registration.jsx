@@ -61,7 +61,7 @@ export default (props) => {
         <>
 
             {
-               usernameAvailable? <Alert className={{
+               !usernameAvailable? <Alert className={{
                     'username-availability-warning': true,
                 }} variant="danger">
                     <strong>{username}</strong> is already taken, try another username.

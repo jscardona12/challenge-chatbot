@@ -111,6 +111,12 @@ router.post('/usernameAvailable', (req, res, next) => {
     let body = {
         username: req.body.username.toLocaleLowerCase(),
     };
+    if(!body.username){
+        res.status(200).json({
+            error: false,
+        });
+        return;
+    }
 
     try {
         User.find({'username': body.username}, (err, user) => {

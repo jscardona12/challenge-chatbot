@@ -5,22 +5,9 @@ export default (props)=>{
         <div className="messages">
             <div id="list">
                 <ul>
-                    {props.messages.filter(message => message.room === props.room).map((message, index) => (
+                    {props.messages.filter(message => message.room === props.room).slice(Math.max(props.messages.length - 50, 0)).map((message, index) => (
                         <li key={index}>
 
-                            {message.url &&
-                            <div>
-                                <div className="msg">
-                                    <h4>{message.from}</h4>
-                                    <div className="body">
-                                        <a href={message.url} rel="noopener noreferrer" target="_blank">My current location</a>
-                                    </div>
-                                </div>
-                                <span className="createdDate">{message.createdDate}</span>
-                            </div>
-                            }
-
-                            {!message.url &&
                             <div>
                                 <div className="msg">
                                     <h4>{message.from}</h4>
@@ -28,9 +15,8 @@ export default (props)=>{
                                         <p>{message.text}</p>
                                     </div>
                                 </div>
-                                <span className="createdDate">{message.createdDate}</span>
+                                <span className="createdDate">{message.timestamp}</span>
                             </div>
-                            }
 
                         </li>
                     ))}

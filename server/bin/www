@@ -31,7 +31,7 @@ socketManager(server);
  */
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/chat-app')
+mongoose.connect('mongodb://localhost:27017/chat-app', { useNewUrlParser: true } )
     .then(() => {
         console.log("The connection to the databse is correct")
 

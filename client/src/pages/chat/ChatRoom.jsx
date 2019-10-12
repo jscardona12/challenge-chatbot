@@ -39,18 +39,49 @@ class ChatRoom extends Component {
 
         socket = io('http://localhost:3030')
 
-        socket.emit('join', params, function (err) {
+        socket.emit('join', params,  (err) =>{
             if (err) {
                 this.props.history.push('/');
             }
         });
 
-        socket.on('updateUserList', function (users) {
+        socket.on('updateUserList',(users) => {
+            console.log(users);
             self.setState({users:users});
         });
 
+        socket.on('updateMessages',(messages)=>{
+            messages.forEach((msg)=>{
+                msg.timestamp = moment(msg.timestamp).format('HH:mm');
+            })
+            self.setState({messages});
+            if (messages.length > 3) {
+                self.scrollToBottom();
+            }
+        });
 
-        socket.on('disconnect', function () {
+        socket.on('newMessage', (message) => {
+            var formattedTime = moment(message.timestamp).format('HH:mm');
+            let newMsg = {
+                text: message.text,
+                from: message.from,
+                room: message.room,
+                timestamp: formattedTime
+            }
+            let results = self.state.messages;
+            results.push(newMsg);
+            self.setState({
+                messages: results
+            });
+
+            var msgArr = self.state.messages.filter(message => message.room === this.props.match.params.room);
+            if (msgArr.length > 3) {
+                self.scrollToBottom();
+            }
+        });
+
+
+        socket.on('disconnect',  () =>{
             console.log('Connection lost from server.');
         });
 
@@ -99,7 +130,6 @@ class ChatRoom extends Component {
     }
 
     render() {
-
         const { newMsg } = this.state;
 
         return (
