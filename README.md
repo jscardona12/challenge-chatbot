@@ -16,7 +16,7 @@
 ### 2. Go to server folder and execute npm start the server is going to run on localhost:3030.
 
 ## Bonuses
-### 1. implemented more thant one group chat.
+### 1. implemented more than one group chat.
 ### 2. implemented error handling for the Bot.
 ### 3. implement Unit test for testing join action of sockets.
 >>>to run tests go to test folder and execute npm run test.
