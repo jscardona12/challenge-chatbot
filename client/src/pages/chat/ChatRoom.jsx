@@ -144,7 +144,7 @@ class ChatRoom extends Component {
                 <div className="messages_wrap">
 
                     <h1>
-                        <Link to="/">
+                        <Link to="/chat">
                             <i className="fas fa-chevron-circle-left"></i>
                         </Link>
                         {this.props.match.params.room}

@@ -4,28 +4,33 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import DebounceInput from 'react-debounce-input';
-import {registerUser,saveUserIdInLS, checkUsernameAvailability} from '../../../utils/serverPetitions.js';
+import {registerUser, saveUserIdInLS, checkUsernameAvailability} from '../../../utils/serverPetitions.js';
 //import './Registration.css';
 
 export default (props) => {
     //State
-    const [username,setUsername] = useState('');
-    const [password,setPassword] = useState('');
-    const [usernameAvailable,setUsernameAvailable] = useState(true);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [usernameAvailable, setUsernameAvailable] = useState(true);
 
     //History Hook
     let history = useHistory();
 
 
-    let register = async (e)=>{
+    let register = async (e) => {
         e.preventDefault();
-        if(!usernameAvailable)
+        if (!usernameAvailable)
             return;
         try {
-            const response = await registerUser({username,password});
+            const response = await registerUser({username, password});
             props.setLoadingState(false);
             if (response.error) {
-                alert('There was a problem register the user, please try again later')
+                if (response.message) {
+                    alert(response.message);
+                } else {
+                    alert('There was a problem register the user, please try again later')
+                }
+
             } else {
 
                 saveUserIdInLS('userid', response.userId);
@@ -37,45 +42,26 @@ export default (props) => {
         }
     };
 
-    let checkUsername= async (event)  => {
-        if(event.target.value !== '' && event.target.value !== undefined) {
-            setUsername(event.target.value);
-            try {
-                const response = await checkUsernameAvailability(username);
-                props.setLoadingState(false);
-                if(response.error) {
-                    setUsernameAvailable(false);
-                } else {
-                    setUsernameAvailable(true);
-                }
-            } catch (error) {
-                props.setLoadingState(false);
-                setUsernameAvailable(false);
-            }
-        } else if (event.target.value === '') {
-            setUsernameAvailable(true);
-        }
-    }
-
     return (
         <>
 
             {
-               !usernameAvailable? <Alert className={{
+                !usernameAvailable ? <Alert className={{
                     'username-availability-warning': true,
                 }} variant="danger">
                     <strong>{username}</strong> is already taken, try another username.
-                </Alert> :null
-            }    
+                </Alert> : null
+            }
 
             <Form className="auth-form">
                 <Form.Group controlId="formUsername">
-                    <DebounceInput
-                        className="form-control"
+                    <Form.Control
+                        type="text"
+                        name="username"
                         placeholder="Username"
-                        minLength={2}
-                        debounceTimeout={300}
-                        onChange={(e)=>{checkUsername(e)}}
+                        onChange={(e) => {
+                            setUsername(e.target.value)
+                        }}
                     />
                 </Form.Group>
 
@@ -84,7 +70,9 @@ export default (props) => {
                         type="password"
                         name="password"
                         placeholder="Password"
-                        onChange={(e)=>{setPassword(e.target.value)}}
+                        onChange={(e) => {
+                            setPassword(e.target.value)
+                        }}
                     />
                 </Form.Group>
                 <Button variant="primary" type="submit" onClick={register}>

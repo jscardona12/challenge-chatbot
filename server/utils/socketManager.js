@@ -15,6 +15,9 @@ module.exports = (server) => {
         });
 
         socket.on('join', (params, callback) => {
+            if(params.test){
+                socket.emit('updateMessages',[]);
+            }
             socket.join(params.room);
             User.findById(params.userId, (err, user) => {
                 if (err) {
@@ -31,6 +34,7 @@ module.exports = (server) => {
                                     callback(err)
                                 } else {
                                     io.to(params.room).emit('updateUserList', users);
+
                                     Message.find({'room':params.room}).sort({'timestamp': -1}).limit(50).exec((err,messages)=>{
                                         if(err){
                                             callback(err);
@@ -38,18 +42,6 @@ module.exports = (server) => {
                                         else
                                             io.to(params.room).emit('updateMessages', messages.reverse());
                                     });
-                                    socket.emit('newMessage', {
-                                        from: 'Admin',
-                                        room: params.room,
-                                        text: 'Welcome to the chat app.',
-                                        timestamp: moment.valueOf()
-                                    });
-                                    socket.broadcast.to(params.room).emit('newMessage', {
-                                        from: 'Admin',
-                                        room: params.room,
-                                        text: `${user.username} has joined.`,
-                                        timestamp: moment.valueOf()
-                                    })
                                 }
                             })
                         }

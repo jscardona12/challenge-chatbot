@@ -28,22 +28,38 @@ router.post('/register', (req, res, next) => {
 
             body.password = passwordHash.createHash(body.password);
 
-            const result = new User(body).save((err, user) => {
+            User.find({'username': body.username}, (err, user) => {
                 if (err) {
                     res.status(500).json({
                         error: true,
                         message: err
                     });
-                }if (user === null || user === undefined) {
-                    res.status(200).json({
-                        error: false,
-                        message: "User registration failed"
+
+                }
+                else if (user.length === 0) {
+                    new User(body).save((err, user) => {
+                        if (err) {
+                            res.status(500).json({
+                                error: true,
+                                message: err
+                            });
+                        }if (user === null || user === undefined) {
+                            res.status(200).json({
+                                error: false,
+                                message: "User registration failed"
+                            });
+                        } else {
+                            res.status(200).json({
+                                error: false,
+                                userId: user._id,
+                                message: 'user created succesfully'
+                            });
+                        }
                     });
                 } else {
                     res.status(200).json({
-                        error: false,
-                        userId: user._id,
-                        message: 'user created succesfully'
+                        error: true,
+                        message: "Username is already taken"
                     });
                 }
             });
@@ -106,42 +122,5 @@ router.post('/login', (req, res, next) => {
     }
 });
 
-
-router.post('/usernameAvailable', (req, res, next) => {
-    let body = {
-        username: req.body.username.toLocaleLowerCase(),
-    };
-    if(!body.username){
-        res.status(200).json({
-            error: false,
-        });
-        return;
-    }
-
-    try {
-        User.find({'username': body.username}, (err, user) => {
-            if (err) {
-                res.status(500).json({
-                    error: true,
-                    message: err
-                });
-
-            }
-            else if (user.length === 0) {
-                res.status(200).json({
-                    error: false,
-                });
-            } else {
-                res.status(200).json({
-                    error: true,
-                });
-            }
-        });
-
-    } catch (error) {
-        res.status(500).json(error);
-    }
-
-});
 
 module.exports = router;
