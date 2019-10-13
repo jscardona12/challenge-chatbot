@@ -125,7 +125,12 @@ class ChatRoom extends Component {
         var obj = {
             'text': this.state.newMsg
         };
-        socket.emit('createMessage', obj, function (data) { });
+        socket.emit('createMessage', obj, function (data) {
+            console.log(data);
+            if(data && data.botError){
+                alert(JSON.stringify(data.error));
+            }
+        });
         this.clearForm();
     }
 

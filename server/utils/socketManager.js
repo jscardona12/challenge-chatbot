@@ -5,6 +5,7 @@ let moment = require('moment');
 let request = require('request');
 
 
+
 module.exports = (server) => {
     let io = socketIO(server);
     io.on('connection', (socket) => {
@@ -71,36 +72,9 @@ module.exports = (server) => {
             else{
                 const regex = /(\/stock)=([a-zA-Z.]+)/gm;
                 let match = regex.exec(message.text);
-                if(match[0] && match[2]){
-                    request.get('https://stooq.com/q/l/?s='+match[2]+'&f=sd2t2ohlcv&h&e=csv',(err,res,data)=>{
-                        let jsonData = csvJSON(data);
-                        console.log(jsonData);
-                        User.find({'socketId':socket.id},(err,users)=>{
-                            let user;
-                            if(users[0])
-                                user = users[0];
-                            if(err)
-                                callback(err);
-                            if (user) {
-                                let tempObj = {
-                                    from: 'StockBot',
-                                    room: user.room,
-                                    text: match[2].toUpperCase() + " quote is $"+ jsonData[0]['Close']+ " per share.",
-                                    timestamp: moment().toDate()
-                                };
-                                new Message(tempObj).save((err,message)=>{
-                                    if(!err){
-                                        io.to(user.room).emit('newMessage', tempObj);
-                                        callback({
-                                            data: tempObj
-                                        });
-                                    }
-                                });
-
-                            }
-                            callback();
-                        })
-                    })
+                if(match && match[0] && match[2]){
+                    //BOT
+                    botHandling(match, callback, socket, io);
                 }
                 else{
                     User.find({'socketId':socket.id},(err,users)=>{
@@ -177,4 +151,49 @@ function csvJSON(csv){
 
     }
     return result;
+}
+
+function botHandling(match, callback, socket, io) {
+    request.get('https://stooq.com/q/l/?s=' + match[2] + '&f=sd2t2ohlcv&h&e=csv', (err, res, data) => {
+        if (err) {
+            //bot error handling
+            callback({botError: true, error: err});
+        } else {
+            let jsonData = csvJSON(data);
+            if (jsonData && jsonData[0]) {
+                //bot error handling
+                if (jsonData[0]['Close'] === 'N/D') {
+                    callback({botError: true, error: `Stock symbol ${match[2]} doesn't exists`});
+                    return;
+                }
+                User.find({'socketId': socket.id}, (err, users) => {
+                    let user;
+                    if (users[0])
+                        user = users[0];
+                    if (err)
+                        callback(err);
+                    if (user) {
+                        let tempObj = {
+                            from: 'StockBot',
+                            room: user.room,
+                            text: match[2].toUpperCase() + " quote is $" + jsonData[0]['Close'] + " per share.",
+                            timestamp: moment().toDate()
+                        };
+                        new Message(tempObj).save((err, message) => {
+                            if (!err) {
+                                io.to(user.room).emit('newMessage', tempObj);
+                                callback({
+                                    data: tempObj
+                                });
+                            }
+                        });
+
+                    }
+                    callback();
+                })
+            }
+
+        }
+
+    })
 }
